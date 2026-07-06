@@ -1,7 +1,11 @@
+#Mengimport library yang dibutuhkan
+
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sqlalchemy import create_engine, insert, MetaData, Table, text
+
+
 
 def buat_koneksi():
     #Membuat koneksi sql dari main ke database sql
@@ -12,6 +16,8 @@ def buat_koneksi():
     except Exception as e:
         print(f"Terjadi error: {e}")
         return None
+
+
 
 def login():
     print("""
@@ -36,7 +42,8 @@ Masuk sebagai:
         else:
             print("[!] Password salah. [!]")
             return None
-        
+    
+    #Jika user memilih pembeli maka akan diarahkan ke menu pembeli    
     elif pilihan == '2':
         print("Selamat datang pembeli, selamat berbelanja!")
         return 'pembeli'
@@ -48,6 +55,8 @@ Masuk sebagai:
     else:
         print("Pilihan tidak valid.")
         return None
+
+
 
 def read_data():
     try:
@@ -85,6 +94,8 @@ def read_data():
         print(f"Terjadi error {e}")
         return None
     
+
+
 def show_statistik():
 
     #Membuat looping
@@ -132,6 +143,8 @@ Pilihan kolom :
         except Exception as e:
             print(f"Terjadi error: {e}")
             break
+
+
 
 def data_visualization():
     #Membuat looping
@@ -196,6 +209,8 @@ Pilihan Tabel:
         except Exception as e:
             print(f"Terjadi error: '{e}'")
 
+
+
 def add_data():
     try:
         print("""
@@ -211,7 +226,7 @@ def add_data():
                 #menambahkan data baru ke tabel produk
                 print("TAMBAH DATA PRODUK")
                 nama = input("Masukkan nama produk: ")
-                kategori = input("Masukkan kategori produk")
+                kategori = input("Masukkan kategori produk: ")
                 harga = float(input("Masukkan harga produk: "))
                 stok = int(input("Masukkan stok produk: "))
 
@@ -253,10 +268,13 @@ def add_data():
 
     except Exception as e:
         print(f"Terjadi error: {e}")
-                            
+
+
+            
 def pembelian():
     print("Pembelian")
-    read_data(role='pembeli')
+    df = pd.read_sql("SELECT * FROM capstone1", engine)
+    print(df)
 
     id_p = int(input('Masukkan ID produk yang ingin dibeli:'))
     qty = int(input('Masukkan jumlah produk yang ingin dibeli:'))
@@ -276,14 +294,14 @@ def pembelian():
         diskon = 0
         kode_v = input("Masukkan kode voucher (Jika tidak ada, tekan Enter):")
 
-        #Membuat variabel yang akan digunakan nanti jika pembeli tidak mempunya voucher
+        #Membuat variabel yang akan digunakan nanti jika pembeli tidak mempunyai voucher
         voucher_valid = False
-
 
         if kode_v:
             with engine.connect() as conn:
                 v_res = conn.execute(text('SELECT * FROM voucher WHERE kode_voucher = :k AND kuota > 0'), {'k': kode_v}).fetchone()
                 if v_res:
+                    #Diskon akan diambil dari database MySQL
                     diskon = v_res.potongan
                     voucher_valid = True
                     conn.execute(text('UPDATE voucher SET kuota = kuota - 1 WHERE kode_voucher = :k'), {'k': kode_v})
